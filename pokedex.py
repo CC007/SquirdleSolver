@@ -35,13 +35,15 @@ class Pokemon:
     height: Decimal
     weight: Decimal
 
+
 def _get_pokemon(name: str, data: list):
     return Pokemon(name, data[0], data[1], data[2], Decimal(str(data[3])), Decimal(str(data[4])))
 
-def get_pokemon(name = None):
+
+def get_pokemon(name=None):
     with open('pokedex.json', "r") as pokedex_file:
         pokedex: dict[str, list] = json.load(pokedex_file)
-        if name == None:
+        if name is None:
             pokemon_list: list[Pokemon] = []
             for name, data in pokedex.items():
                 pokemon_list.append(_get_pokemon(name, data))

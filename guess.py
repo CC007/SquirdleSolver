@@ -35,6 +35,12 @@ class TypeResult(Enum):
 Result: TypeAlias = tuple[ValueResult, TypeResult, TypeResult, ValueResult, ValueResult]
 
 
+def get_result(gen: int, type1: bool, type2: bool, height: int, weight: int) \
+        -> tuple[ValueResult, TypeResult, TypeResult, ValueResult, ValueResult]:
+    """Get the tuple of a result based on the enum values"""
+    return ValueResult(gen), TypeResult(type1), TypeResult(type2), ValueResult(height), ValueResult(weight)
+
+
 def get_possible_results() -> list[Result]:
     results = []
     for gen in ValueResult:
