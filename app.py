@@ -42,8 +42,9 @@ def take_a_guess(guess_name, guess_result, pokedex, options_after_previous_guess
     return options_after_guess
 
 
-def getResult(gen, type1, type2, height, weight):
-    return (ValueResult(gen), TypeResult(type1), TypeResult(type2), ValueResult(height), ValueResult(weight))
+def get_result(gen: int, type1: bool, type2: bool, height: int, weight: int) -> tuple[ValueResult, TypeResult, TypeResult, ValueResult, ValueResult]:
+    """Get the tuple of a result based on the enum values"""
+    return ValueResult(gen), TypeResult(type1), TypeResult(type2), ValueResult(height), ValueResult(weight)
 
 
 def main():
@@ -57,32 +58,32 @@ def main():
     # calculate_expected_information(pokedex)
     options_after_guess1 = take_a_guess(
         "Simipour",
-        getResult(0, False, False, -1, -1),
+        get_result(0, False, False, -1, -1),
         pokedex
     )
     options_after_guess2 = take_a_guess(
         "Rufflet",
-        getResult(0, False, False, 1, 1),
+        get_result(0, False, False, 1, 1),
         pokedex, options_after_guess1
     )
     options_after_guess3 = take_a_guess(
         "Galarian Zapdos",
-        getResult(0, False, False, 1, 1),
+        get_result(0, False, False, 1, 1),
         pokedex, options_after_guess2
     )
     options_after_guess4 = take_a_guess(
         "Runerigus",
-        getResult(0, False, False, 1, 1),
+        get_result(0, False, False, 1, 1),
         pokedex, options_after_guess3
     )
     options_after_guess5 = take_a_guess(
         "Runerigus",
-        getResult(0, False, False, 1, 1),
+        get_result(0, False, False, 1, 1),
         pokedex, options_after_guess4
     )
     options_after_guess6 = take_a_guess(
         "Runerigus",
-        getResult(0, False, False, 1, 1),
+        get_result(0, False, False, 1, 1),
         pokedex, options_after_guess5
     )
 
