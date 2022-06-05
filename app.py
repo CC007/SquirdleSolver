@@ -1,10 +1,11 @@
 import statistics
+from time import perf_counter
 
-from guess import guess, Result
-from histogram import histogram
-from information import expected_information, get_histogram
+from guess import guess, Result, get_result
+from histogram import histogram, show_bar_plot
+from information import get_expected_information, get_histogram
 from pokedex import get_pokemon, Pokemon
-from utils import sort_dict_by_val
+from utils import sort_dict_by_val, sort_dict_by_key
 
 
 def get_histograms(pokedex):
@@ -27,14 +28,18 @@ def calculate_expected_information(pokedex, reduced_pokedex=None, *, output=Fals
 
     expected_info: dict[Pokemon, float] = {}
     for pokemon in pokedex:
-        expected_info[pokemon] = expected_information(pokemon, reduced_pokedex)
+        expected_info[pokemon] = get_expected_information(pokemon, reduced_pokedex)
 
     if output:
-        for pokemon, info in sort_dict_by_val(expected_info, desc=False).items():
-            print(f"{pokemon.name} ({pokemon.type1}, {pokemon.type2}): {info} bits")
-        print()
+        print_expected_information(sort_dict_by_val(expected_info, desc=False))
 
     return sort_dict_by_val(expected_info, desc=True)
+
+
+def print_expected_information(expected_information: dict[Pokemon, float]):
+    for pokemon, info in expected_information.items():
+        print(f"{pokemon.name} ({pokemon.type1}, {pokemon.type2}): {info} bits")
+    print()
 
 
 def determine_options_after_guess(guess: Pokemon, guess_result: Result, options_after_previous_guess) -> list[Pokemon]:
@@ -58,31 +63,67 @@ def process_guess_manually(guess_name, guess_result, pokedex, options_after_prev
     return options_after_guess
 
 
+def manual_guessing(pokedex):
+    calculate_expected_information(pokedex)
+    options_after_guess1 = process_guess_manually(
+        "Simipour",
+        get_result(0, False, False, -1, -1),
+        pokedex
+    )
+    options_after_guess2 = process_guess_manually(
+        "Rufflet",
+        get_result(0, False, False, 1, 1),
+        pokedex, options_after_guess1
+    )
+    options_after_guess3 = process_guess_manually(
+        "Galarian Zapdos",
+        get_result(0, False, False, 1, 1),
+        pokedex, options_after_guess2
+    )
+    options_after_guess4 = process_guess_manually(
+        "Runerigus",
+        get_result(0, False, False, 1, 1),
+        pokedex, options_after_guess3
+    )
+    options_after_guess5 = process_guess_manually(
+        "Runerigus",
+        get_result(0, False, False, 1, 1),
+        pokedex, options_after_guess4
+    )
+    options_after_guess6 = process_guess_manually(
+        "Runerigus",
+        get_result(0, False, False, 1, 1),
+        pokedex, options_after_guess5
+    )
+
+
+def do_guess(actual_pokemon, expected_information, options_after_guess):
+    pokemon_guess, best_expected_info = list[tuple[Pokemon, float]](expected_information.items())[0]
+    print(f"{pokemon_guess.name} ({pokemon_guess.type1}, {pokemon_guess.type2}): {best_expected_info} bits")
+    result = guess(actual_pokemon, pokemon_guess)
+    options_after_guess = determine_options_after_guess(pokemon_guess, result, options_after_guess)
+    print(f"Result: {result}")
+    print(f"{len(options_after_guess)} options left")
+    expected_information = calculate_expected_information(options_after_guess)
+    return options_after_guess, expected_information, result
+
+
 def solver(actual_pokemon: Pokemon, pokedex: list[Pokemon],
            cached_initial_expected_information: dict[Pokemon, float] = None):
     if cached_initial_expected_information is None:
-        pokemon_expected_information = calculate_expected_information(pokedex)
+        expected_information = calculate_expected_information(pokedex)
     else:
-        pokemon_expected_information = cached_initial_expected_information
-    pokemon_guess, best_expected_info = list[tuple[Pokemon, float]](pokemon_expected_information.items())[0]
-    print(f"{pokemon_guess.name} ({pokemon_guess.type1}, {pokemon_guess.type2}): {best_expected_info} bits")
-    result = guess(actual_pokemon, pokemon_guess)
-    options_after_guess = determine_options_after_guess(pokemon_guess, result, pokedex)
-    print(f"{len(options_after_guess)} options left")
-    while len(options_after_guess) > 1:
-        pokemon_expected_information = calculate_expected_information(pokedex, options_after_guess)
-        pokemon_guess, best_expected_info = list[tuple[Pokemon, float]](pokemon_expected_information.items())[0]
-        print(f"{pokemon_guess.name} ({pokemon_guess.type1}, {pokemon_guess.type2}): {best_expected_info} bits")
-        if best_expected_info == 0.0:
-            print(f"Pokemon left: {options_after_guess}")
-            print(f"Actual pokemon: {actual_pokemon.name}")
-            exit(1)
-            break
-        result = guess(actual_pokemon, pokemon_guess)
-        options_after_guess = determine_options_after_guess(pokemon_guess, result, options_after_guess)
-        print(f"{len(options_after_guess)} options left")
-    print(f"Final guess: {options_after_guess[0].name}")
+        expected_information = cached_initial_expected_information
+    options_after_guess = pokedex
+    result = None
+    i = 0
+    while len(options_after_guess) > 0 and result != get_result(0, True, True, 0, 0):
+        options_after_guess, expected_information, result = \
+            do_guess(actual_pokemon, expected_information, options_after_guess)
+        i += 1
+    print(f"Final guess: {list(map(lambda x: x.name, options_after_guess))}")
     print(f"Actual pokemon: {actual_pokemon.name}")
+    return i
 
 
 def main():
@@ -90,44 +131,24 @@ def main():
     # get_histograms(pokedex)
     # get_stats(pokedex, lambda elem: elem.height)
     # get_stats(pokedex, lambda elem: elem.weight)
-    # calculate_expected_information(pokedex)
-    # options_after_guess1 = process_guess_manually(
-    #     "Simipour",
-    #     get_result(0, False, False, -1, -1),
-    #     pokedex
-    # )
-    # options_after_guess2 = process_guess_manually(
-    #     "Rufflet",
-    #     get_result(0, False, False, 1, 1),
-    #     pokedex, options_after_guess1
-    # )
-    # options_after_guess3 = process_guess_manually(
-    #     "Galarian Zapdos",
-    #     get_result(0, False, False, 1, 1),
-    #     pokedex, options_after_guess2
-    # )
-    # options_after_guess4 = process_guess_manually(
-    #     "Runerigus",
-    #     get_result(0, False, False, 1, 1),
-    #     pokedex, options_after_guess3
-    # )
-    # options_after_guess5 = process_guess_manually(
-    #     "Runerigus",
-    #     get_result(0, False, False, 1, 1),
-    #     pokedex, options_after_guess4
-    # )
-    # options_after_guess6 = process_guess_manually(
-    #     "Runerigus",
-    #     get_result(0, False, False, 1, 1),
-    #     pokedex, options_after_guess5
-    # )
+    # manual_guessing(pokedex)
     initial_expected_information = calculate_expected_information(pokedex)
+    hist: dict[int, int] = {}
 
-    for i in range(375, 1050):
+    tic = perf_counter()
+
+    for i in range(0, 1050):
         # n = randrange(0, 1050)
         print(i)
-        solver(pokedex[i], pokedex, cached_initial_expected_information=initial_expected_information)
+        iterations = solver(pokedex[i], pokedex, cached_initial_expected_information=initial_expected_information)
+        count = hist.get(iterations) or 0
+        hist[iterations] = count + 1
         print()
+    sorted_hist = dict(map(lambda item: (str(item[0]), item[1]), sort_dict_by_key(hist, desc=False).items()))
+    show_bar_plot(sorted_hist, "Number of guesses", "Number of guesses", "Number of pokemon")
+    print(sorted_hist)
+    toc = perf_counter()
+    print(f"Average time to solve: {(toc - tic)/1050.0:0.4f} seconds")
 
 
 if __name__ == '__main__':

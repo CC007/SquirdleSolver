@@ -4,7 +4,7 @@ from guess import Result, guess
 from pokedex import Pokemon
 
 
-def expected_information(pokemon: Pokemon, pokedex: list[Pokemon]) -> float:
+def get_expected_information(pokemon: Pokemon, pokedex: list[Pokemon]) -> float:
     """The sum for all x of the probability of x times the information of x
     x is a possible result for a guess, for instance: 🔼🟩🟥🔽🔽 (we'll assume that swap is not denoted and counts as a 🟥)
     The information of x is the binary log of 1 over the probability of x

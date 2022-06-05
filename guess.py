@@ -19,6 +19,14 @@ class ValueResult(Enum):
         elif a > b:
             return ValueResult.HIGHER
 
+    def __repr__(self):
+        switch = {
+            ValueResult.HIGHER: "🔼",
+            ValueResult.EQUAL: "🟩",
+            ValueResult.LOWER: "🔽"
+        }
+        return switch.get(self)
+
 
 class TypeResult(Enum):
     EQUAL = True
@@ -30,6 +38,13 @@ class TypeResult(Enum):
             return TypeResult.EQUAL
         else:
             return TypeResult.NOT_EQUAL
+
+    def __repr__(self):
+        switch = {
+            TypeResult.EQUAL: "🟩",
+            TypeResult.NOT_EQUAL: "🟥"
+        }
+        return switch.get(self)
 
 
 Result: TypeAlias = tuple[ValueResult, TypeResult, TypeResult, ValueResult, ValueResult]

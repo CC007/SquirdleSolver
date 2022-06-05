@@ -21,16 +21,18 @@ def histogram(
         _populate_histogram(attr, hist, pokemon)
 
     hist = sorting_func(hist, desc)
-    # Dataset generation
+    show_bar_plot(hist, "Histogram of pokemon per " + attr, attr, "No. of pokemon", plot_width)
+
+
+def show_bar_plot(hist, title, xlabel, ylabel, plot_width=10):
     keys = list(map(lambda key: "Single-typed" if key == "" else key, hist.keys()))
     values = list(hist.values())
+
     plt.figure(figsize=(plot_width, 5))
-    #  Bar plot
-    plt.bar(keys, values, color='green',
-            width=0.5)
-    plt.xlabel(attr)
-    plt.ylabel("No. of pokemon")
-    plt.title("Histogram of pokemon per " + attr)
+    plt.bar(keys, values, color='green', width=0.5)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
     plt.show()
 
 
